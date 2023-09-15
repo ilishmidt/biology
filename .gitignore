@@ -1,0 +1,7 @@
+*.pyc
+lib
+*.zip
+.idea
+venv
+.DS_Store
+uploads
