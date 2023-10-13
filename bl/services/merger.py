@@ -10,20 +10,25 @@ import bl.services.files as files_service
 
 
 def merge(file: UploadFile) -> FileResponse:
-    workdir, extracted = files_service.process_uploaded_file(file=file)
+    workdir, extracted, zip_path, result_path = files_service.process_uploaded_file(file=file)
 
     data = files_service.read_all_txt_files(path=extracted)
     completed_data = apply_completion_files(data=data)
 
     csv_dir = files_service.txt_to_csv_files(workdir=workdir, data=completed_data.files)
 
-    result_path = merge_csvs(workdir=workdir, path=csv_dir)
+    result_csv = merge_csvs(workdir=workdir, path=csv_dir)
+    files_service.move(src=csv_dir, dst=f'{result_path}')
+    files_service.move(src=result_csv, dst=f'{result_path}')
+
+    final_zip_path = f'{workdir}/final_zip'
+    files_service.make_archive(path_to_zip=final_zip_path, src=result_path)
 
     return FileResponse(
-        path=result_path,
+        path=f'{final_zip_path}.zip',
         media_type='application/octet-stream',
-        filename='merged.csv',
-        background=BackgroundTask(func=files_service.cleanup, path=workdir)
+        filename='merged.zip',
+        background=BackgroundTask(func=files_service.cleanup, paths=[workdir])
     )
 
 

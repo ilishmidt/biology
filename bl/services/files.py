@@ -32,7 +32,7 @@ class TextFileContent:
     data: dict
 
 
-def process_uploaded_file(file: UploadFile) -> Tuple[str, str]:
+def process_uploaded_file(file: UploadFile) -> Tuple[str, str, str, str]:
     workdir = os.path.join(UPLOAD_DIR, str(datetime.utcnow()))
 
     try:
@@ -47,15 +47,28 @@ def process_uploaded_file(file: UploadFile) -> Tuple[str, str]:
         with zipfile.ZipFile(zip_path, "r") as zip_ref:
             zip_ref.extractall(path=extracted)
 
-        return workdir, extracted
+        result_path = f'{workdir}/result'
+        os.makedirs(name=result_path, exist_ok=True)
+
+        return workdir, extracted, zip_path, result_path
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=f'{e}')
 
 
-def cleanup(path: str):
-    if os.path.exists(path=path):
-        shutil.rmtree(path=path)
+def cleanup(paths: List[str]):
+    for path in paths:
+        if os.path.exists(path=path):
+            shutil.rmtree(path=path)
+
+
+def move(src: str, dst: str):
+    if os.path.exists(path=src):
+        shutil.move(src=src, dst=dst)
+
+
+def make_archive(path_to_zip: str, src: str):
+    shutil.make_archive(path_to_zip, 'zip', src)
 
 
 def read_txt_file(path: str) -> TextFileContent:
