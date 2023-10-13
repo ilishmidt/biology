@@ -1,12 +1,10 @@
 import uvicorn
 from fastapi import FastAPI
 
-from api.controllers.files import files_controller
-from api.controllers.test import test_controller
+from api.controllers.merger import files_controller
 
 app = FastAPI()
-app.include_router(router=files_controller, tags=['Files'])
-app.include_router(router=test_controller, tags=['Test'])
+app.include_router(router=files_controller, tags=['Merger'])
 
 
 if __name__ == '__main__':
